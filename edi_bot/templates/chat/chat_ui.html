@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDI 834 ChatBot - Healthcare Data Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'github-dark': '#0d1117',
+                        'github-card': '#161b22',
+                        'github-border': '#30363d',
+                        'github-surface': '#21262d',
+                        'github-green': '#2ea043',
+                        'github-green-hover': '#238636'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+        }
+        
+        .message-animation {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+        
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #21262d;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl h-[90vh] flex flex-col bg-github-card shadow-2xl rounded-xl overflow-hidden border border-github-border">
+        <!-- Header -->
+        <div class="flex items-center justify-center p-6 bg-gradient-to-r from-github-surface to-github-border border-b border-github-border">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <svg class="w-8 h-8 text-github-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-github-green rounded-full pulse-dot"></div>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">EDI 834 ChatBot</h1>
+                    <p class="text-sm text-gray-400">Healthcare Data Interchange Assistant</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar scroll-smooth">
+            <!-- Welcome Message -->
+            <div id="welcome-message" class="text-center py-12">
+                <svg class="w-16 h-16 text-github-green mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-300 mb-2">Welcome to EDI 834 ChatBot</h3>
+                <p class="text-gray-500 max-w-md mx-auto">
+                    I'm here to provide the Information about the SSN Status 
+                </p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-6 bg-github-surface border-t border-github-border">
+            <form id="chat-form" class="flex gap-3">
+                <div class="flex-1 relative">
+                    <input 
+                        id="user-input" 
+                        type="text" 
+                        placeholder="Ask me about EDI 834, healthcare data, or anything else..."
+                        class="w-full bg-github-dark border border-github-border text-white placeholder-gray-500 focus:border-github-green focus:ring-1 focus:ring-github-green focus:outline-none pr-12 py-3 px-4 text-sm rounded-lg transition-all duration-200"
+                    >
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div class="w-2 h-2 bg-github-green rounded-full pulse-dot"></div>
+                    </div>
+                </div>
+                <button 
+                    id="send-button"
+                    type="submit"
+                    class="bg-github-green hover:bg-github-green-hover text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    <svg id="send-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    <svg id="loading-icon" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+            <div class="flex items-center justify-center mt-3 text-xs text-gray-500">
+                <span>Powered by AI • Press Enter to send</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const input = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const sendIcon = document.getElementById('send-icon');
+        const loadingIcon = document.getElementById('loading-icon');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const chatForm = document.getElementById('chat-form');
+        
+        let isLoading = false;
+        let messageCount = 0;
+
+        function hideWelcomeMessage() {
+            if (welcomeMessage && messageCount === 0) {
+                welcomeMessage.style.display = 'none';
+            }
+        }
+
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function createAvatar(isUser) {
+            const avatar = document.createElement('div');
+            avatar.className = `w-10 h-10 rounded-full flex items-center justify-center ${isUser ? 'bg-github-green' : 'bg-github-border'}`;
+            
+            const icon = document.createElement('svg');
+            icon.className = 'w-5 h-5 text-white';
+            icon.setAttribute('fill', 'none');
+            icon.setAttribute('stroke', 'currentColor');
+            icon.setAttribute('viewBox', '0 0 24 24');
+            
+            if (isUser) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>';
+            }
+            
+            avatar.appendChild(icon);
+            return avatar;
+        }
+
+        function appendMessage(sender, text, isTyping = false) {
+            hideWelcomeMessage();
+            messageCount++;
+            
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `flex gap-4 message-animation ${sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`;
+            
+            const avatar = createAvatar(sender === 'user');
+            messageContainer.appendChild(avatar);
+            
+            const contentContainer = document.createElement('div');
+            contentContainer.className = `flex-1 max-w-[80%] ${sender === 'user' ? 'text-right' : 'text-left'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `inline-block px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                sender === 'user'
+                    ? 'bg-github-green text-white rounded-br-md'
+                    : 'bg-github-border text-gray-100 rounded-bl-md border border-github-surface'
+            }`;
+            
+            if (isTyping) {
+                bubble.innerHTML = `
+                    <div class="flex items-center gap-2 text-gray-400">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-sm">EDI 834 is thinking...</span>
+                    </div>
+                `;
+            } else {
+                bubble.innerHTML = `<div class="whitespace-pre-wrap break-words">${text}</div>`;
+            }
+            
+            contentContainer.appendChild(bubble);
+            
+            if (!isTyping) {
+                const timestamp = document.createElement('div');
+                timestamp.className = `text-xs text-gray-500 mt-1 ${sender === 'user' ? 'text-right' : 'text-left'}`;
+                timestamp.textContent = getCurrentTime();
+                contentContainer.appendChild(timestamp);
+            }
+            
+            messageContainer.appendChild(contentContainer);
+            chatBox.appendChild(messageContainer);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            return messageContainer;
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            sendButton.disabled = loading;
+            input.disabled = loading;
+            
+            if (loading) {
+                sendIcon.classList.add('hidden');
+                loadingIcon.classList.remove('hidden');
+            } else {
+                sendIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
+            }
+        }
+
+        async function sendMessage() {
+            const message = input.value.trim();
+            if (!message || isLoading) return;
+
+            appendMessage('user', message);
+            input.value = '';
+            setLoading(true);
+
+            const typingMessage = appendMessage('bot', '', true);
+
+            try {
+                const response = await fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken(),
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                const data = await response.json();
+                chatBox.removeChild(typingMessage);
+                
+                if (response.ok) {
+                    appendMessage('bot', data.response || '⚠️ No response received');
+                } else {
+                    appendMessage('bot', '❌ Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                chatBox.removeChild(typingMessage);
+                appendMessage('bot', '❌ Bot is currently unavailable. Please check your connection and try again.');
+            } finally {
+                setLoading(false);
+                input.focus();
+            }
+        }
+
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    return decodeURIComponent(cookie.slice(name.length + 1));
+                }
+            }
+            return '';
+        }
+
+        // Event listeners
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            input.focus();
+        });
+    </script>
+</body>
+</html>
